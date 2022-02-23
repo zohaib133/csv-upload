@@ -163,7 +163,7 @@ class SaleViewSet(mixins.UpdateModelMixin,
 def login(request):
     import json
     data = json.loads(request.body.decode('utf-8'))
-    username = data['username'].lower().strip()
+    username = data['email'].lower().strip()
     password = data['password'] if 'password' in data else None
 
     user = authenticate(username=username, password=password)
