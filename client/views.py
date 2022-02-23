@@ -162,7 +162,11 @@ class SaleViewSet(mixins.UpdateModelMixin,
 @DRequests.public_rest_call(allowed_method_list=['POST'])
 def login(request):
     import json
-    data = json.loads(request.body.decode('utf-8'))
+
+    try:
+        data = json.loads(request.body.decode('utf-8'))
+    except Exception as e:
+        data = request.POST
     username = data['email'].lower().strip()
     password = data['password'] if 'password' in data else None
 
