@@ -101,7 +101,7 @@ class FailureResponse:
 
 
 def respond(response_):
-    return Response(response_, status=response_['meta']['status'])
+    return Response(response_['data'], status=response_['meta']['status'])
 
 
 def handler404error(request, exception):
