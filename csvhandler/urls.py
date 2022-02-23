@@ -29,7 +29,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/v1/', include('client.urls')),
 
-    path('login', TokenObtainPairView.as_view(), name='login'),
+    path('login/', TokenObtainPairView.as_view(), name='login'),
     path('', include(router.urls)),
 
 ]
