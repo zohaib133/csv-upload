@@ -19,9 +19,16 @@ DRequests = DecoratorHandler()
 @DRequests.authenticated_rest_call(allowed_method_list=['GET'])
 def get_countries(request):
     countries = Country.objects.all()
-    data = PaginationClass(countries, CountrySerializer, request)
-    data = data.paginate()
-    return SuccessResponse(data=data,
+    countries_list_ = []
+    for obj in countries.iterator():
+        dict_ = {
+            'id': obj.id,
+            'name': obj.name
+        }
+        cities = City.objects.filter(country=obj)
+        dict_['cities'] = [{'id': x.id, 'name': x.name} for x in cities]
+        countries_list_.append(dict_)
+    return SuccessResponse(data=countries_list_,
                            status_code=SUCCESS_RESPONSE_CODE).return_response_object()
 
 
@@ -30,7 +37,7 @@ def get_cities(request):
     cities = City.objects.filter(country_id=request.GET.get('country_id'))
     data = PaginationClass(cities, CitySerializer, request)
     data = data.paginate()
-    return SuccessResponse(data=data,
+    return SuccessResponse(data=data['data'],
                            status_code=SUCCESS_RESPONSE_CODE).return_response_object()
 
 

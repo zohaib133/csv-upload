@@ -23,6 +23,9 @@ class City(models.Model):
 class User(AbstractUser):
     gender = models.CharField(max_length=1, choices=GENDER, null=True, db_column='gender')
     email = models.EmailField(null=True, db_column='email')
+    age = models.IntegerField(null=True, db_column='age')
+    city = models.ForeignKey(City, on_delete=models.CASCADE, null=True)
+    country = models.ForeignKey(Country, on_delete=models.CASCADE, null=True)
     created_by = UserForeignKey(auto_user_add=True, related_name="user_created_by")
     updated_by = UserForeignKey(auto_user=True, related_name="user_updated_by")
     created_at = models.DateTimeField(auto_now_add=True, db_column='created_at')

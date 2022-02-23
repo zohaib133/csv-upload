@@ -29,7 +29,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/v1/', include('client.urls')),
 
-    path('login/', login, name='login'),
+    path('api/v1/login/', login, name='login'),
     path('', include(router.urls)),
 
 ]
