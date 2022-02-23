@@ -1,6 +1,9 @@
 import datetime
+
+from django.contrib.auth import authenticate
 from django.db.models import Avg, Max, Sum, Count
 from rest_framework.permissions import IsAuthenticated
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from client.request_handler import DecoratorHandler
 from client.serializers import CountrySerializer, CitySerializer, UserSerializer, SaleSerializer
@@ -154,3 +157,21 @@ class SaleViewSet(mixins.UpdateModelMixin,
     queryset = Sale.objects.all()
     serializer_class = SaleSerializer
     permission_classes = (IsAuthenticated,)
+
+
+@DRequests.public_rest_call(allowed_method_list=['POST'])
+def login(request):
+    import json
+    data = json.loads(request.body.decode('utf-8'))
+    username = data['username'].lower().strip()
+    password = data['password'] if 'password' in data else None
+
+    user = authenticate(username=username, password=password)
+    if not user or not user.is_active:
+        return FailureResponse(message='Invalid username/password',
+                               status_code=BAD_REQUEST_CODE).return_response_object()
+
+    refresh_token = RefreshToken.for_user(user)
+    return SuccessResponse(data={'token': str(refresh_token.access_token), 'user_id': user.id},
+                           message='Login Successfully!').return_response_object()
+

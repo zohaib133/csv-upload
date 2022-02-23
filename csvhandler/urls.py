@@ -17,7 +17,7 @@ from django.contrib import admin
 from django.urls import path, include
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework import routers
-from client.views import UserViewSet, SaleViewSet
+from client.views import UserViewSet, SaleViewSet, login
 
 
 router = routers.DefaultRouter()
@@ -29,7 +29,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/v1/', include('client.urls')),
 
-    path('login/', TokenObtainPairView.as_view(), name='login'),
+    path('login/', login, name='login'),
     path('', include(router.urls)),
 
 ]
