@@ -1,5 +1,5 @@
 import datetime
-from django.db.models import Avg,Max
+from django.db.models import Avg, Max, Sum, Count
 from rest_framework.permissions import IsAuthenticated
 
 from client.request_handler import DecoratorHandler
@@ -54,28 +54,43 @@ def get_profile(request):
 
 @DRequests.authenticated_rest_call(allowed_method_list=['GET'])
 def sale_statistics(request):
-    sale = Sale.objects.filter(user_id=request.user)
+    sale = Sale.objects.filter(user_id=request.user).values_list('sales_number', 'revenue', 'product')
+    total_revenue = sum([x[1] for x in sale.iterator()])
+    avg_sale = total_revenue / len(sale)
 
-    max_revenue = sale.order_by('-revenue').first()
+    sale_ = Sale.objects.aggregate(Sum('revenue'), Count('id'))
+    total_sale_ = sale_['revenue__sum'] / sale_['id__count']
+
+    max_revenue = Sale.objects.filter(user_id=request.user).order_by('-revenue').first()
     max_revenue_, max_revenue_sale_id, product_based_rev, product_based_revv, product_high_sale, product_high_salee = '', '', '', '', '', ''
     if max_revenue:
         max_revenue_ = max_revenue.revenue
         max_revenue_sale_id = max_revenue.id
 
+    result = Sale.objects.filter(user_id=request.user).values('product').annotate(dcount=Sum('revenue')).order_by('-dcount').first()
+    if result:
+        product_based_rev = result['product']
+        product_based_revv = result['dcount']
+
+    result = Sale.objects.filter(user_id=request.user).values('product').annotate(dcount=Count('sales_number')).order_by('-sales_number').first()
+    if result:
+        product_high_sale = result['product']
+        product_high_salee = result['dcount']
+
     data = {
-        "average_sale_for_current_user": 10,
-        "average_sale_all_user": 20,
+        "average_sale_for_current_user": avg_sale,
+        "average_sale_all_user": total_sale_,
         "highest_revenue_sale_for_current_user": {
             "sale_id": max_revenue_sale_id,
             "revenue": max_revenue_
         },
         "product_revenue_for_current_user": {
-            "product_name": 80,
-            "revenue": 90
+            "product_name": product_based_rev,
+            "price": product_based_revv
         },
         "product_highest_sales_number_for_current_user": {
-            "product_name": 80,
-            "revenue": 90
+            "product_name": product_high_sale,
+            "price": product_high_salee
         },
     }
     return SuccessResponse(data=data,
